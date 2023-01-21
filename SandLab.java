@@ -17,12 +17,13 @@ public class SandLab
     public static final int WATER = 3;
     public static final int ACID = 4;
     public static final int GAS = 5;
-    public static final int CLEAR = 6;
+
+    // Color Adjust
+    // public static final int 20;
 
     //do not add any more fields
     private int[][] grid;
     private SandDisplay display;
-    // private int randColor = -10;
 
     public SandLab(int numRows, int numCols) {
         grid = new int[numRows][numCols];
@@ -34,7 +35,6 @@ public class SandLab
         names[WATER] = "Water";
         names[ACID] = "Acid";
         names[GAS] = "Gas";
-        // names[CLEAR] = "Clear";
 
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
     }
@@ -46,9 +46,9 @@ public class SandLab
         // display.updateDisplay();
     }
 
-    //copies each element of grid into the display
+    // copies each element of grid into the display
     public void updateDisplay() {
-        for(int r = 0; r < grid.length; r++){
+        for(int r = 0; r < grid.length; r++) {
             for(int c = 0; c < grid[r].length; c++){
                 if (grid[r][c] == METAL)
                     display.setColor(r, c, new Color(120,120,120));
@@ -72,15 +72,17 @@ public class SandLab
 
 		int x = (int) (Math.random() * grid.length -1);
 		int y = (int) (Math.random() * grid[0].length -1);
-
+        
+        /*
         if (grid[x][y] == SAND) {
 			if(grid[x + 1][y] == EMPTY || grid[x + 1][y] == WATER) {
 				grid[x][y] = EMPTY;
 				grid[x + 1][y] = SAND;
 			}
 		}
+        */
 
-        else if(grid[x][y] == WATER) {
+        if(grid[x][y] == WATER) {
 			fluid(x, y, 1, WATER);
         }
 
@@ -91,52 +93,93 @@ public class SandLab
         else if(grid[x][y] == ACID) {
             fluid(x, y, 1, ACID);
         }
+
+        else if(grid[x][y] == SAND) {
+            fluid(x, y, 1, SAND);
+        }
+        
     }
 
     public void fluid(int x, int y, int gravity, int toolType) {
-		int num = (int) (Math.random() * 3);
+		int num = (int) (Math.random() * 4);
 
         /*
          * conditions
-         * Above is not blocked
-         * below is not blocked
-         * left is not blocked
-         * right is not blocked
+         * create random number (left, right, gravity)
+         * 
+         * if (left && y - 1 > - 1 && grid[x][y - 1] == EMPTY);
+         * else if (right && y + 1 > grid[0].length && grid[x][y + 1] == EMPTY);
+         * else if (x + gravity > -1 && x + gravity < grid.length && grid[x + gravity] == EMPTY);
+         * else keep current pos
          */
 
-        if(x > 0 && y > 0 && y < grid[0].length && x < grid.length) {
+        grid[x][y] = EMPTY;
 
-            grid[x][y] = EMPTY;
-
-            if(grid[x + gravity][y] > 0) {
-                grid[x][y] = toolType;
-            }
-
-            // left
-            else if(num == 1 && grid[x][y - 1] == EMPTY) {
+        if(toolType == WATER) {
+            // left 25%
+            if (num == 0 && y - 1 > - 1 && grid[x][y - 1] == EMPTY){
                 grid[x][y - 1] = toolType;
             }
-            // right
-            else if(num == 2 && grid[x][y + 1] == EMPTY) {
+
+            // right 25%
+            else if (num == 1 && y + 1 < grid[0].length && grid[x][y + 1] == EMPTY) {
                 grid[x][y + 1] = toolType;
+
             }
-            // down/up
-            else if(grid[x + gravity][y] == EMPTY) {
+
+            // gravity 50%
+            else if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY)) {
+                grid[x + gravity][y] = toolType;
+            }
+            
+            // stay
+            else {
+                grid[x][y] = toolType;
+            }
+        }
+
+        if(toolType == GAS) {
+            // left 25%
+            if (num == 0 && y - 1 > - 1 && grid[x][y - 1] == EMPTY){
+                grid[x][y - 1] = toolType;
+            }
+
+            // right 25%
+            else if (num == 1 && y + 1 < grid[0].length && grid[x][y + 1] == EMPTY) {
+                grid[x][y + 1] = toolType;
+
+            }
+
+            // gravity 50%
+            else if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER)) {
+                grid[x + gravity][y] = toolType;
+
+                if(grid[x + gravity][y] ==  WATER) {
+                    grid[x][y] = WATER;
+                }
+
+            }
+            
+            // stay
+            else {
+                grid[x][y] = toolType;
+            }
+        }
+
+        if(toolType == SAND) {
+
+            // gravity 50%
+            if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER)) {
+                if(grid[x + gravity][y] == WATER) {
+                    grid[x][y] = WATER;
+                }
+
                 grid[x + gravity][y] = toolType;
             }
 
-            // if gravity is disabled it creates a mound
-            if(grid[x + gravity][y] == toolType) {
-                if(num == 1 && grid[x][y - 1] == EMPTY) {
-                    grid[x][y - 1] = toolType;
-                    grid[x][y] = EMPTY;
-                }
-                else if(num == 2 && grid[x][y + 1] == EMPTY) {
-                    grid[x][y + 1] = toolType;
-                    grid[x][y] = EMPTY;
-                }
+            else {
+                grid[x][y] = toolType;
             }
-
         }
     }
 
