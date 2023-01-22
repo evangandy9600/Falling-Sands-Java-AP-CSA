@@ -6,7 +6,7 @@ public class SandLab
 {
     public static void main(String[] args)
     {
-        SandLab lab = new SandLab(60, 120);
+        SandLab lab = new SandLab(120, 90);
         lab.run();
     }
 
@@ -17,6 +17,7 @@ public class SandLab
     public static final int WATER = 3;
     public static final int ACID = 4;
     public static final int GAS = 5;
+    public static final int RESET = 6;
 
     // Color Adjust
     // public static final int 20;
@@ -28,19 +29,29 @@ public class SandLab
     public SandLab(int numRows, int numCols) {
         grid = new int[numRows][numCols];
         String[] names;
-        names = new String[6];
+        names = new String[7];
         names[EMPTY] = "Empty";
         names[METAL] = "Metal";
         names[SAND] = "Sand";
         names[WATER] = "Water";
         names[ACID] = "Acid";
         names[GAS] = "Gas";
+        names[RESET] = "Reset";
 
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
     }
 
     //called when the user clicks on a location using the given tool
     private void locationClicked(int row, int col, int tool) {
+
+        if(tool == RESET) {
+            for(int r = 0; r < grid.length; r++) {
+                for(int c = 0; c < grid[r].length; c++) {
+                    grid[r][c] = RESET;
+                }
+            }
+        }
+
         grid[row][col] = tool;
         System.out.println("Location Clicked: " + col + ", " + row);
         // display.updateDisplay();
@@ -69,8 +80,8 @@ public class SandLab
     //causes one random particle to maybe do something.
     public void step() {
 
-		int x = (int) (Math.random() * grid.length -1);
-		int y = (int) (Math.random() * grid[0].length -1);
+		int x = (int) (Math.random() * grid.length);
+		int y = (int) (Math.random() * grid[0].length);
 
         int num = (int) (Math.random() * 3);
         int toolType = grid[x][y];
@@ -88,9 +99,13 @@ public class SandLab
             int gravity = 1;
 
             // gravity 100%
-            if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER)) {
+            if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER || grid[x + gravity][y] == ACID)) {
                 if(grid[x + gravity][y] == WATER) {
                     grid[x][y] = WATER;
+                }
+
+                else if(grid[x + gravity][y] == ACID) {
+                    grid[x][y] = ACID;
                 }
 
                 grid[x + gravity][y] = SAND;
@@ -139,11 +154,15 @@ public class SandLab
             }
 
             // gravity 50%
-            else if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER)) {
+            else if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER || grid[x + gravity][y] == ACID)) {
                 grid[x + gravity][y] = GAS;
 
                 if(grid[x + gravity][y] ==  WATER) {
                     grid[x][y] = WATER;
+                }
+
+                else if(grid[x + gravity][y] == ACID) {
+                    grid[x][y] = ACID;
                 }
 
             }
