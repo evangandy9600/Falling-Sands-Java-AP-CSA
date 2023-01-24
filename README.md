@@ -1,2 +1,3 @@
-Stretch 1) Acid destroys metal
-Stretch 2) Gas rises, vaporizes water and acid
+- Stretch 1) Acid destroys metal
+- Stretch 2) Gas rises, vaporizes water and acid
+- Stretch 3) When using the sand circle, their is a cool down of 100 ms or 0.1 ms
