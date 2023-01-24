@@ -5,7 +5,7 @@ public class SandLab
 {
     public static void main(String[] args)
     {
-        SandLab lab = new SandLab(120, 90);
+        SandLab lab = new SandLab(60, 120);
         lab.run();
     }
 
@@ -16,7 +16,8 @@ public class SandLab
     public static final int WATER = 3;
     public static final int ACID = 4;
     public static final int GAS = 5;
-    public static final int RESET = 6;
+    public static final int CIRCLE = 6;
+    public static final int RESET = 7;
 
     // Color Adjust
     // public static final int 20;
@@ -28,13 +29,14 @@ public class SandLab
     public SandLab(int numRows, int numCols) {
         grid = new int[numRows][numCols];
         String[] names;
-        names = new String[7];
+        names = new String[8];
         names[EMPTY] = "Empty";
         names[METAL] = "Metal";
         names[SAND] = "Sand";
         names[WATER] = "Water";
         names[ACID] = "Acid";
-        names[GAS] = "Gas";
+        names[GAS] = "Vapor";
+        names[CIRCLE] = "Sand Circle";
         names[RESET] = "Reset";
 
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
@@ -49,6 +51,28 @@ public class SandLab
                     grid[r][c] = RESET;
                 }
             }
+        }
+
+        if(tool == CIRCLE) {
+        int radius = 8;
+        int startX = row;
+        int startY = col;
+        // circle = new int[2*radius][2*radius];
+
+        // Iterate over the rows and columns of the array
+        for (int i = startX; i < 2*radius+startX; i++) {
+            for (int j = startY; j < 2*radius+startY; j++) {
+                // Calculate the distance from the center of the circle
+                int xDist = i - startX - radius;
+                int yDist = j - startY - radius;
+                double distance = Math.sqrt(xDist*xDist + yDist*yDist);
+
+                // If the distance is less than or equal to the radius, set the value in the array to 1
+                if (distance <= radius) {
+                    grid[i][j] = SAND;
+                }
+            }
+        }
         }
 
         grid[row][col] = tool;
@@ -72,6 +96,8 @@ public class SandLab
                     display.setColor(r, c, new Color(0,255,0));
                 if(grid[r][c] == GAS)
                     display.setColor(r, c, new Color(188,198,204));
+                if(grid[r][c] == CIRCLE)
+                    display.setColor(r, c, new Color(255,0,0));
 	        }
 	    }
     }
@@ -98,13 +124,17 @@ public class SandLab
             int gravity = 1;
 
             // gravity 100%
-            if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER || grid[x + gravity][y] == ACID)) {
+            if (x + gravity > -1 && x + gravity < grid.length && (grid[x + gravity][y] == EMPTY || grid[x + gravity][y] == WATER || grid[x + gravity][y] == ACID || grid[x + gravity][y] == GAS)) {
                 if(grid[x + gravity][y] == WATER) {
                     grid[x][y] = WATER;
                 }
 
                 else if(grid[x + gravity][y] == ACID) {
                     grid[x][y] = ACID;
+                }
+
+                else if(grid[x + gravity][y] == GAS) {
+                    grid[x][y] = GAS;
                 }
 
                 grid[x + gravity][y] = SAND;
