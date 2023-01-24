@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.util.*;
+import java.lang.Thread;
 
 public class SandLab
 {
@@ -54,25 +55,32 @@ public class SandLab
         }
 
         if(tool == CIRCLE) {
-        int radius = 8;
-        int startX = row;
-        int startY = col;
-        // circle = new int[2*radius][2*radius];
+            int radius = 8;
+            int startX = row;
+            int startY = col;
 
         // Iterate over the rows and columns of the array
-        for (int i = startX; i < 2*radius+startX; i++) {
-            for (int j = startY; j < 2*radius+startY; j++) {
-                // Calculate the distance from the center of the circle
-                int xDist = i - startX - radius;
-                int yDist = j - startY - radius;
-                double distance = Math.sqrt(xDist*xDist + yDist*yDist);
+            for (int i = startX; i < 2*radius+startX; i++) {
+                for (int j = startY; j < 2*radius+startY; j++) {
+                    // Calculate the distance from the center of the circle
+                    int xDist = i - startX - radius;
+                    int yDist = j - startY - radius;
+                    double distance = Math.sqrt(xDist*xDist + yDist*yDist);
 
-                // If the distance is less than or equal to the radius, set the value in the array to 1
-                if (distance <= radius) {
-                    grid[i][j] = SAND;
+                    // If the distance is less than or equal to the radius, set the value in the array to 1
+                    if (distance <= radius) {
+                        grid[i][j] = SAND;
+                    }
                 }
             }
-        }
+
+            try {
+                Thread.sleep(100);
+            } 
+            
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         grid[row][col] = tool;
