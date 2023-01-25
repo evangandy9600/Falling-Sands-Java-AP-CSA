@@ -6,7 +6,7 @@ public class SandLab
 {
     public static void main(String[] args)
     {
-        SandLab lab = new SandLab(60, 120);
+        SandLab lab = new SandLab(120, 90);
         lab.run();
     }
 
@@ -19,7 +19,9 @@ public class SandLab
     public static final int GAS = 5;
     public static final int SANDCIRCLE = 6;
     public static final int WATERCIRCLE = 7;
-    public static final int RESET = 8;
+    public static final int ACIDCIRCLE = 8;
+    public static final int DEATHRAY = 9;
+    public static final int RESET = 10;
 
     // Color Adjust
     // public static final int 20;
@@ -31,15 +33,17 @@ public class SandLab
     public SandLab(int numRows, int numCols) {
         grid = new int[numRows][numCols];
         String[] names;
-        names = new String[9];
+        names = new String[11];
         names[EMPTY] = "Empty";
         names[METAL] = "Metal";
         names[SAND] = "Sand";
         names[WATER] = "Water";
         names[ACID] = "Acid";
         names[GAS] = "Gas";
-        names[SANDCIRCLE] = "Sand Circle";
-        names[WATERCIRCLE] = "Water Circle";
+        names[SANDCIRCLE] = "Bucket of Sand";
+        names[WATERCIRCLE] = "Bucket of Water";
+        names[ACIDCIRCLE] = "Bucket of Acid";
+        names[DEATHRAY] = "Ray of Death";
         names[RESET] = "Reset";
 
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
@@ -57,40 +61,43 @@ public class SandLab
         }
 
         else if(tool == SANDCIRCLE) {
-            createCircle(row, col, 8, SAND);
+            createCircle(row, col, 4, SAND);
         }
 
         else if(tool == WATERCIRCLE) {
-            createCircle(row, col, 8, WATER);
+            createCircle(row, col, 4, WATER);
+        }
+
+        else if(tool == ACIDCIRCLE) {
+            createCircle(row, col, 4, ACID);
+        }
+
+        else if(tool == DEATHRAY) {
+            for(int r = 0; r < grid.length; r++) {
+                for(int c = col; c < grid[0].length && c < col + 3; c++) {
+                    grid[r][c] = DEATHRAY;
+                }
+            }
         }
 
         grid[row][col] = tool;
         System.out.println("Location Clicked: " + col + ", " + row);
-        // display.updateDisplay();
     }
 
     public void createCircle(int row, int col, int radius, int toolType) {
-        for (int i = row; i < 2 * radius + row; i++) {
-            for (int j = col; j < 2 * radius + col; j++) {
-                    // Calculate the distance from the center of the circle
-                    int xDist = i - row - radius;
-                    int yDist = j - col - radius;
-                    double distance = Math.sqrt(xDist*xDist + yDist*yDist);
+        for (int i = row; i < 2 * radius + row && i < grid.length; i++) {
+            for (int j = col; j < 2 * radius + col && j < grid[0].length; j++) {
+                // Calculate the distance from the center of the circle
+                int xDist = i - row - radius;
+                int yDist = j - col - radius;
+                double distance = Math.sqrt(xDist*xDist + yDist*yDist);
 
-                    // If the distance is less than or equal to the radius, set the value in the array to 1
-                    if (distance <= radius) {
-                        grid[i][j] = toolType;
-                    }
+                // If the distance is less than or equal to the radius, set the value in the array to 1
+                if (distance <= radius) {
+                    grid[i][j] = toolType;
                 }
             }
-
-            try {
-                Thread.sleep(100);
-            } 
-            
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        }
     }
 
     // copies each element of grid into the display
@@ -103,13 +110,25 @@ public class SandLab
                     display.setColor(r, c, new Color(0,0,0));
                 if(grid[r][c] == SAND)
                     display.setColor(r, c, new Color(255,255,0));
-                if(grid[r][c] == WATER)
+
+                // water depth
+                double x = Math.random();
+                if(grid[r][c] == WATER && r - 1 > -1 && grid[r - 1][c] == EMPTY && x < 0.3)
+                    display.setColor(r, c, new Color(255,255,255));
+                else if(grid[r][c] == WATER && r - 2 > -1 && grid[r - 2][c] == EMPTY && x < 0.3)
+                    display.setColor(r - 1, c, new Color(25,100,255));
+                else if(grid[r][c] == WATER && r - 3 > -1 && grid[r - 3][c] == EMPTY && x < 0.3)
+                    display.setColor(r - 2, c, new Color(15,50,255));
+                else if(grid[r][c] == WATER && x < 0.01)
+                    display.setColor(r, c, new Color(0,150,255));
+                else if(grid[r][c] == WATER)
                     display.setColor(r, c, new Color(0,0,255));
+
                 if(grid[r][c] == ACID)
                     display.setColor(r, c, new Color(0,255,0));
                 if(grid[r][c] == GAS)
                     display.setColor(r, c, new Color(188,198,204));
-                if(grid[r][c] == CIRCLE)
+                if(grid[r][c] == DEATHRAY)
                     display.setColor(r, c, new Color(255,0,0));
 	        }
 	    }
@@ -124,6 +143,10 @@ public class SandLab
         int num = (int) (Math.random() * 3);
         int toolType = grid[x][y];
         grid[x][y] = EMPTY;
+
+        if(toolType == DEATHRAY && Math.random() < 0.7) {
+            grid[x][y] = DEATHRAY;
+        }
 
         if(toolType == EMPTY) {
             grid[x][y] = EMPTY;
@@ -256,6 +279,16 @@ public class SandLab
 
             if (mouseLoc != null)  //test if mouse clicked
                 locationClicked(mouseLoc[0], mouseLoc[1], display.getTool());
+        }
+    }
+
+    public void pause(int ms) {
+        try {
+            Thread.sleep(ms);
+        } 
+        
+        catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
