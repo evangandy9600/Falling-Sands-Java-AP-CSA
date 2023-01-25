@@ -17,8 +17,9 @@ public class SandLab
     public static final int WATER = 3;
     public static final int ACID = 4;
     public static final int GAS = 5;
-    public static final int CIRCLE = 6;
-    public static final int RESET = 7;
+    public static final int SANDCIRCLE = 6;
+    public static final int WATERCIRCLE = 7;
+    public static final int RESET = 8;
 
     // Color Adjust
     // public static final int 20;
@@ -30,14 +31,15 @@ public class SandLab
     public SandLab(int numRows, int numCols) {
         grid = new int[numRows][numCols];
         String[] names;
-        names = new String[8];
+        names = new String[9];
         names[EMPTY] = "Empty";
         names[METAL] = "Metal";
         names[SAND] = "Sand";
         names[WATER] = "Water";
         names[ACID] = "Acid";
-        names[GAS] = "Vapor";
-        names[CIRCLE] = "Sand Circle";
+        names[GAS] = "Gas";
+        names[SANDCIRCLE] = "Sand Circle";
+        names[WATERCIRCLE] = "Water Circle";
         names[RESET] = "Reset";
 
         display = new SandDisplay("Falling Sand", numRows, numCols, names);
@@ -54,22 +56,30 @@ public class SandLab
             }
         }
 
-        if(tool == CIRCLE) {
-            int radius = 8;
-            int startX = row;
-            int startY = col;
+        else if(tool == SANDCIRCLE) {
+            createCircle(row, col, 8, SAND);
+        }
 
-        // Iterate over the rows and columns of the array
-            for (int i = startX; i < 2*radius+startX; i++) {
-                for (int j = startY; j < 2*radius+startY; j++) {
+        else if(tool == WATERCIRCLE) {
+            createCircle(row, col, 8, WATER);
+        }
+
+        grid[row][col] = tool;
+        System.out.println("Location Clicked: " + col + ", " + row);
+        // display.updateDisplay();
+    }
+
+    public void createCircle(int row, int col, int radius, int toolType) {
+        for (int i = row; i < 2 * radius + row; i++) {
+            for (int j = col; j < 2 * radius + col; j++) {
                     // Calculate the distance from the center of the circle
-                    int xDist = i - startX - radius;
-                    int yDist = j - startY - radius;
+                    int xDist = i - row - radius;
+                    int yDist = j - col - radius;
                     double distance = Math.sqrt(xDist*xDist + yDist*yDist);
 
                     // If the distance is less than or equal to the radius, set the value in the array to 1
                     if (distance <= radius) {
-                        grid[i][j] = SAND;
+                        grid[i][j] = toolType;
                     }
                 }
             }
@@ -81,11 +91,6 @@ public class SandLab
             catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-
-        grid[row][col] = tool;
-        System.out.println("Location Clicked: " + col + ", " + row);
-        // display.updateDisplay();
     }
 
     // copies each element of grid into the display
